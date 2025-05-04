@@ -6,6 +6,10 @@ import "../src/TodoList.sol";
 
 contract TodoListTest is Test {
     TodoList todo;
+    
+    // Define the events here to use in expectEmit
+    event TodoAdded(uint id, string content);
+    event TodoStatusUpdated(uint id, TodoList.Status status);
 
     function setUp() public {
         todo = new TodoList();
@@ -47,5 +51,25 @@ contract TodoListTest is Test {
     function testRevertWhenGettingNonExistentTodo() public {
         vm.expectRevert("Todo does not exist.");
         todo.getTodo(100);
+    }
+
+    function testEmitTodoAddedEvent() public {
+        string memory content = "Write tests";
+
+        // Expect the event to be emitted with these arguments
+        vm.expectEmit(true, true, false, true);
+        emit TodoAdded(0, content);
+
+        todo.addTodo(content);
+    }
+    
+    function testEmitTodoStatusUpdatedEvent() public {
+        todo.addTodo("Test status update");
+        
+        // Expect the event to be emitted with these arguments
+        vm.expectEmit(true, true, false, true);
+        emit TodoStatusUpdated(0, TodoList.Status.InProgress);
+        
+        todo.updateStatus(0, TodoList.Status.InProgress);
     }
 }
